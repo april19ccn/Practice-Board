@@ -11,6 +11,8 @@
 
     <n-space>
         <ColorTest></ColorTest>
+
+        <CardFlex style="margin-top: 300px;"></CardFlex>
     </n-space>
   </div>
 </template>
@@ -21,6 +23,7 @@ import CardArray from './modules/CardArray.vue'
 import LayoutTest from './modules/LayoutTest.vue';
 import ProgressTest from './modules/ProgressTest.vue';
 import ColorTest from './modules/ColorTest.vue';
+import CardFlex from './modules/CardFlex.vue';
 </script>
 
 <style scoped></style>

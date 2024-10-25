@@ -1,13 +1,25 @@
 <script setup>
 import DownLoad from './components/DownLoad.vue';
+import { ref,onBeforeMount, onBeforeUnmount } from 'vue';
+
+const isMobile = ref(false)
 
 const resizeHandler = () => {
   const rect = document.body.getBoundingClientRect()
   const isMobile = rect.width < 980
-  appStore.setDevice(isMobile ? 'mobile' : 'desktop')
-  appStore.setCollapse(isMobile)
 }
 
+// vueuse/core
+const debounceFn = useDebounceFn(resizeHandler, 100)
+
+onBeforeMount(() => {
+  resizeHandler()
+  window.addEventListener('resize', debounceFn)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', debounceFn)
+})
 </script>
 
 <template>

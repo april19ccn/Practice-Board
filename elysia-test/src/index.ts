@@ -2,12 +2,14 @@ import { Elysia } from "elysia";
 import { opentelemetry } from '@elysiajs/opentelemetry'
 import { swagger } from '@elysiajs/swagger'
 
-import { base } from './base'
-import { user } from './user'
-import { note } from './note'
-import { date } from './date'
+import { base } from './controllers/base'
+import { user } from './controllers/user'
+import { note } from './controllers/note'
+import { date } from './controllers/date'
 
-const app = new Elysia()
+import { controller } from "./controllers";
+
+export const app = new Elysia()
     .use(opentelemetry()) 
     .use(swagger({
         scalarConfig: {
@@ -22,10 +24,11 @@ const app = new Elysia()
 
         console.error(error) 
     }) 
-    .use(base)
-    .use(user)
-    .use(note)
-    .use(date)
+    // .use(base)
+    // .use(user)
+    // .use(note)
+    // .use(date)
+    .use(controller)
     .listen(3000);
 
 console.log(

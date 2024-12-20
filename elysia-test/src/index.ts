@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+import { opentelemetry } from '@elysiajs/opentelemetry'
 import { swagger } from '@elysiajs/swagger'
 
 import { base } from './base'
@@ -7,6 +8,7 @@ import { note } from './note'
 import { date } from './date'
 
 const app = new Elysia()
+    .use(opentelemetry()) 
     .use(swagger({
         scalarConfig: {
             defaultHttpClient: {
@@ -15,6 +17,11 @@ const app = new Elysia()
             },
         }
     }))
+    .onError(({ error, code }) => { 
+        if (code === 'NOT_FOUND') return 'Not Found :('
+
+        console.error(error) 
+    }) 
     .use(base)
     .use(user)
     .use(note)

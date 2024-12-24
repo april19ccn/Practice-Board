@@ -18,7 +18,9 @@ class Note {
 		] 
 	) {} 
 
-    add(note: Memo) { 
+    add(note: Memo) {
+        debugger
+        
         this.data.push(note) 
 
         return this.data 
@@ -37,7 +39,7 @@ export const note = new Elysia({ prefix: '/note' })
     .use(userService) 
     .decorate('note', new Note())
     .model({ 
-    	memo: t.Omit(memo, ['author']) 
+    	memo: t.Omit(memo, ['author'])
     }) 
     .onTransform(function log({ body, params, path, request: { method } }) { 
         console.log(`${method} ${path}`, { 

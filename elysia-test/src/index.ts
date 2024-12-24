@@ -2,15 +2,19 @@ import { Elysia } from "elysia";
 import { opentelemetry } from '@elysiajs/opentelemetry'
 import { swagger } from '@elysiajs/swagger'
 
-import { base } from './controllers/base'
-import { user } from './controllers/user'
-import { note } from './controllers/note'
-import { date } from './controllers/date'
-
 import { controller } from "./controllers";
 
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
+
 export const app = new Elysia()
-    .use(opentelemetry()) 
+    .use(opentelemetry({
+        spanProcessors: [
+            new BatchSpanProcessor(
+                new OTLPTraceExporter()
+            )
+        ]
+    })) 
     .use(swagger({
         scalarConfig: {
             defaultHttpClient: {

@@ -1,0 +1,13 @@
+{
+  "name": "fp-test",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "my-ex.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,5 +1,3 @@
-export const _ = {}
-
 export function curry(fn, args, holes) {
     let length = fn.length;
 
@@ -56,15 +54,13 @@ export function curry(fn, args, holes) {
     }
 }
 
-
-export const match = curry(function(what, str) {
-    return str.match(what);
-});
-
-// export const split = curry(function(what, str) {
-//     return str.split(what);
-// })
-
-export const split = curry((what, str) =>{
-    return str.split(what);
-})
+export const compose = () => {
+    var args = arguments;
+    var start = args.length - 1;
+    return () => {
+        var i = start;
+        var result = args[start].apply(this, arguments);
+        while (i--) result = args[i].call(this, result);
+        return result;
+    };
+};

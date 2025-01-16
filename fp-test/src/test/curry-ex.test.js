@@ -1,7 +1,7 @@
 // npx vitest 启动测试
 import { describe, expect, test } from 'vitest'
 
-import * as E from "../ex/my-ex.js"
+import * as E from "../ex/curry-ex.js"
 
 describe("Curry Exercises", () => {
     test('Exercise 1', () => {

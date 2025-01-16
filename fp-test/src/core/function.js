@@ -1,3 +1,5 @@
+export const _ = {}
+
 export function curry(fn, args, holes) {
     let length = fn.length;
 
@@ -5,7 +7,7 @@ export function curry(fn, args, holes) {
 
     holes = holes || [];
 
-    return function() {
+    return function () {
 
         var _args = args.slice(0),
             _holes = holes.slice(0),
@@ -54,10 +56,10 @@ export function curry(fn, args, holes) {
     }
 }
 
-export const compose = () => {
+export function compose() {
     var args = arguments;
     var start = args.length - 1;
-    return () => {
+    return function () {
         var i = start;
         var result = args[start].apply(this, arguments);
         while (i--) result = args[i].call(this, result);

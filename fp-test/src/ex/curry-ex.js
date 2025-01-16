@@ -1,4 +1,4 @@
-import * as fp from "../core/my-fp.js"
+import * as fp from "../index.js";
 
 // 练习 1
 //==============

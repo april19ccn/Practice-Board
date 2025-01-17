@@ -1,3 +1,8 @@
+import * as fp from "../index.js";
+// import R from "../../node_modules/ramda"
+import * as R from 'ramda'
+// const R = require('ramda');
+
 const data = {
     result: "SUCCESS",
     tasks: [
@@ -47,17 +52,71 @@ const fetchData = function() {
 //     })
 // }
 
-// 方案2 方案1的优化
-export const getIncompleteTaskSummaries = (username) => {
-    return fetchData()
-        .then(data => data.tasks)
-        .then(tasks => tasks.filter(task => !task.completed))
-        .then(tasks => tasks.filter(task => task.username == username))
-        .then(tasks => tasks.map(task => {
-            delete task.username
-            delete task.complete
-            delete task.created
-            return task
-        }))
-        .then(tasks => tasks.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()))
+// 方案2 方案1的优化（test：✔）
+// export const getIncompleteTaskSummaries = (username) => {
+//     return fetchData()
+//         .then(data => data.tasks)
+//         .then(tasks => tasks.filter(task => !task.completed))
+//         .then(tasks => tasks.filter(task => task.username == username))
+//         .then(tasks => tasks.map(task => {
+//             delete task.username
+//             delete task.complete
+//             delete task.created
+//             return task
+//         }))
+//         .then(tasks => tasks.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()))
+// }
+
+
+// 方案3 函数式（test：✔）
+// const getObjectValue = fp.curry(function(key, obj) {
+//     return obj[key];
+// });
+// const filter = fp.curry(function(fp, arr) {
+//     return arr.filter(fp)
+// })
+// const isTrue = fp.curry(function(key, obj) {
+//     return !obj[key];
+// })
+// const isEqual = fp.curry(function(key, value, x) {
+//     return x[key] === value;
+// })
+// const map = fp.curry(function(fp, arr) {
+//     return arr.map(fp);
+// })
+// const deleteValue = fp.curry(function(key, obj) {
+//     delete obj[key];
+//     return obj;
+// })
+// const sort = fp.curry(function(fp, arr) {
+//     return arr.sort(fp);
+// })
+// const timeSort = (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+
+// export const getIncompleteTaskSummaries = async (username) => {
+//     return fp.compose(
+//         sort(timeSort),
+//         map(fp.compose(deleteValue('username'), deleteValue('complete'), deleteValue('created'))),
+//         filter(isEqual('username', username)),
+//         filter(isTrue('complete')),
+//         getObjectValue('tasks')
+//     )(await fetchData())
+// }
+
+// 方案4（用y-fp实现）
+
+
+
+// 方案5（用ramda实现）
+export const getIncompleteTaskSummaries = async (username) => {
+    return R.compose(
+        R.sort(R.ascend(R.prop('dueDate'))),
+        R.map(R.pick(['id', 'priority', 'title', 'dueDate'])),
+        R.filter(R.propEq(username, 'username')),
+        R.filter(R.propEq(false, 'complete')),
+        R.prop("tasks")
+    )(await fetchData())
 }
+
+
+// getIncompleteTaskSummaries("Punam")

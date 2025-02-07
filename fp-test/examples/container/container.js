@@ -99,3 +99,18 @@ console.log(
         pointfree_map(R.prop("age"))
     )(Maybe.of({name: "Dinah", age: 14}))
 )
+
+//////////////////////////////////////// 用例
+//  safeHead :: [a] -> Maybe(a)
+var safeHead = function(xs) {
+    return Maybe.of(xs[0]);
+};
+
+// ramda:map 若第二个参数自身存在 map 方法，则调用自身的 map 方法。
+var streetName = R.compose(R.map(R.prop('street')), safeHead, R.prop('addresses'));
+
+console.log(streetName({addresses: []}));
+// Maybe(null)
+
+console.log(streetName({addresses: [{street: "Shady Ln.", number: 4201}]}));
+// Maybe("Shady Ln.")

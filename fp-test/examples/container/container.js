@@ -73,15 +73,15 @@ console.log(Maybe.of("Malkovich Malkovich").map(R.match(/a/ig)))
 console.log(Maybe.of(null).map(R.match(/a/ig)))
 //=> Maybe(null)
 
-console.log(Maybe.of({name: "Boris"}).map(R.prop("age")).map(R.add(10)))
+console.log(Maybe.of({ name: "Boris" }).map(R.prop("age")).map(R.add(10)))
 //=> Maybe(null)
 
-console.log(Maybe.of({name: "Dinah", age: 14}).map(R.prop("age")).map(R.add(10)))
+console.log(Maybe.of({ name: "Dinah", age: 14 }).map(R.prop("age")).map(R.add(10)))
 //=> Maybe(24)
 
 
 //  map :: Functor f => (a -> b) -> f a -> f b
-var pointfree_map = R.curry(function(f, any_functor_at_all) {
+var pointfree_map = R.curry(function (f, any_functor_at_all) {
     return any_functor_at_all.map(f);
     // return any_functor_at_all.of(f(any_functor_at_all.__value)) // 不能这么写 1. Maybe.of 是静态方法，如果写成实例方法占内存 2. 不优雅
 });
@@ -97,20 +97,82 @@ console.log(
     R.compose(
         pointfree_map(R.add(10)),
         pointfree_map(R.prop("age"))
-    )(Maybe.of({name: "Dinah", age: 14}))
+    )(Maybe.of({ name: "Dinah", age: 14 }))
 )
 
 //////////////////////////////////////// 用例
 //  safeHead :: [a] -> Maybe(a)
-var safeHead = function(xs) {
+var safeHead = function (xs) {
     return Maybe.of(xs[0]);
 };
 
-// ramda:map 若第二个参数自身存在 map 方法，则调用自身的 map 方法。
-var streetName = R.compose(R.map(R.prop('street')), safeHead, R.prop('addresses'));
+var streetName = R.compose(pointfree_map(R.prop('street')), safeHead, R.prop('addresses'));
 
-console.log(streetName({addresses: []}));
+console.log(streetName({ addresses: [] }));
 // Maybe(null)
 
-console.log(streetName({addresses: [{street: "Shady Ln.", number: 4201}]}));
+console.log(streetName({ addresses: [{ street: "Shady Ln.12", number: 420110 }] }));
+// Maybe("Shady Ln.12")
+
+// ramda:map 若第二个参数自身存在 map 方法，则调用自身的 map 方法。
+var streetName1 = R.compose(R.map(R.prop('street')), safeHead, R.prop('addresses'));
+
+console.log(streetName1({ addresses: [] }));
+// Maybe(null)
+
+console.log(streetName1({ addresses: [{ street: "Shady Ln.", number: 4201 }] }));
 // Maybe("Shady Ln.")
+
+
+//////////////////////////////////////// “纯”错误处理
+var Left = function (x) {
+    this.__value = x;
+}
+
+Left.of = function (x) {
+    return new Left(x);
+}
+
+Left.prototype.map = function (f) {
+    return this;
+}
+
+var Right = function (x) {
+    this.__value = x;
+}
+
+Right.of = function (x) {
+    return new Right(x);
+}
+
+Right.prototype.map = function (f) {
+    return Right.of(f(this.__value));
+}
+
+console.log(Right.of("rain").map(function(str){ return "b"+str; }));
+// Right("brain")
+
+console.log(Left.of("rain").map(function(str){ return "b"+str; }));
+// Left("rain")
+
+console.log(Right.of({host: 'localhost', port: 80}).map(R.prop('host')));
+// Right('localhost')
+
+console.log(Left.of("rolls eyes...").map(R.prop("host")));
+// Left('rolls eyes...')
+
+// 测试之前Maybe例子
+const getArrayHead = (arr) => {
+    if (arr.length === 0) { return Left.of("array is empty") }
+    else { return Right.of(arr[0]) }
+} 
+
+var streetName_Either = R.compose(R.map(R.prop('street')), getArrayHead, R.prop('addresses'));
+
+console.log(streetName_Either({ addresses: [] }));
+// Maybe(null)
+
+console.log(streetName_Either({ addresses: [{ street: "Shady Ln. Either", number: 420110 }] }));
+
+
+///TODO: 例子加上

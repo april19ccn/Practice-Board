@@ -71,6 +71,8 @@ var findParam = function(key) {
   return R.map(R.compose(Maybe.of, R.filter(R.compose(_.eq(key), R.head)), params), url);
 };
 
+console.log(findParam("key"))
+
 ////// 非纯调用代码: main.js ///////
 
 // 调用 __value() 来运行它！

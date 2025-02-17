@@ -31,6 +31,7 @@ console.log(Maybe.of({ name: "Dinah", age: 14 }).map(R.prop("age")).map(R.add(10
 //=> Maybe(24)
 
 
+// 本质是拓宽了map的使用范围，之前map是仅供数组这个特定functor使用
 //  map :: Functor f => (a -> b) -> f a -> f b
 var pointfree_map = R.curry(function (f, any_functor_at_all) {
     return any_functor_at_all.map(f);
@@ -51,6 +52,19 @@ console.log(
     )(Maybe.of({ name: "Dinah", age: 14 }))
 )
 
+// 直接使用R.map
+console.log(
+    "R.map",
+    R.map(R.match(/a/ig))(Maybe.of("Malkovich Malkovich"))
+)
+console.log(
+    "R.map",
+    R.compose(
+        R.map(R.add(10)),
+        R.map(R.prop("age"))
+    )(Maybe.of({ name: "Dinah", age: 14 }))
+)
+
 //////////////////////////////////////// 用例
 //  safeHead :: [a] -> Maybe(a)
 var safeHead = function (xs) {
@@ -58,6 +72,8 @@ var safeHead = function (xs) {
 };
 
 var streetName = R.compose(pointfree_map(R.prop('street')), safeHead, R.prop('addresses'));
+
+console.log("streetName ==> ", streetName);
 
 console.log(streetName({ addresses: [] }));
 // Maybe(null)

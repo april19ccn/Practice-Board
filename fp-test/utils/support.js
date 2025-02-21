@@ -449,11 +449,13 @@ class Task {
 
   // ----- Pointed (Task a)
   static of(x) {
+    debugger
     return new Task((_, resolve) => resolve(x));
   }
 
   // ----- Functor (Task a)
   map(fn) {
+    debugger
     return new Task((reject_, resolve) => this.fork(reject_, compose(resolve, fn)));
   }
 

@@ -1,4 +1,3 @@
-// npx vitest 启动测试
 import { describe, expect, test } from 'vitest'
 
 import * as E from "../ex/curry-ex.js"

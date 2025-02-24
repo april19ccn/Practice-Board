@@ -5,14 +5,18 @@
   "description": "",
   "main": "my-ex.js",
   "scripts": {
-    "test": "jest"
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "data.task": "^3.1.2",
     "folktale": "^2.3.2",
     "moment": "^2.30.1",
     "ramda": "^0.30.1"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.6"
   }
 }

@@ -1,32 +1,33 @@
-require('../../support');
-var Task = require('data.task');
-var _ = require('ramda');
+import * as _ from "ramda"
+import { Maybe, IO, either, Either, left, map, toUpperCase } from "../../utils/support.js";
+// const Task = require('data.task');
+import Task from "data.task"
 
 // Exercise 1
 // ==========
 // Use _.add(x,y) and _.map(f,x) to make a function that increments a value inside a functor
 
-var ex1 = _.map(_.add(1));
+const ex1 = _.map(_.add(1));
 
 
 
 // Exercise 2
 // ==========
 // Use _.head to get the first element of the list
-var xs = Identity.of(['do', 'ray', 'me', 'fa', 'so', 'la', 'ti', 'do']);
+// var xs = Identity.of(['do', 'ray', 'me', 'fa', 'so', 'la', 'ti', 'do']);
 
-var ex2 = _.map(_.head());
+const ex2 = _.map(_.head());
 
 
 
 // Exercise 3
 // ==========
 // Use safeProp and _.head to find the first initial of the user
-var safeProp = _.curry(function (x, o) { return Maybe.of(o[x]); });
+const safeProp = _.curry(function (x, o) { return Maybe.of(o[x]); });
 
-var user = { id: 2, name: "Albert" };
+// const user = { id: 2, name: "Albert" };
 
-var ex3 = _.compose(_.map(_.head()), safeProp('name'));
+const ex3 = _.compose(_.map(_.head()), safeProp('name'));
 
 
 
@@ -34,15 +35,15 @@ var ex3 = _.compose(_.map(_.head()), safeProp('name'));
 // ==========
 // Use Maybe to rewrite ex4 without an if statement
 
-var ex4 = function (n) {
-  if (n) { return parseInt(n); }
-};
+// var ex4 = function (n) {
+//   if (n) { return parseInt(n); }
+// };
 
-var ex4 = (n) => {
+const ex4_1 = (n) => {
     return Maybe.of(parseInt(n));
 };
 
-var ex4 = _.compose(_.map(parseInt), Maybe.of);
+const ex4_2 = _.compose(_.map(parseInt), Maybe.of);
 
 
 // Exercise 5
@@ -51,28 +52,35 @@ var ex4 = _.compose(_.map(parseInt), Maybe.of);
 
 // getPost :: Int -> Future({id: Int, title: String})
 var getPost = function (i) {
-  return new Task(function(rej, res) {
-    setTimeout(function(){
-      res({id: i, title: 'Love them futures'})  
-    }, 300)
-  });
+    return new Task(function (rej, res) {
+        setTimeout(function () {
+            res({ id: i, title: 'Love them futures' })
+        }, 300)
+    });
 };
 
 var ex5 = _.compose(_.map(_.compose(_.toUpper, _.prop('title'))), getPost);
 
-
+// console.log(ex5(13))
+// console.log(ex5(13).fork(console.log, function (res) {
+//     console.log(res)
+// }))
+// ex5(13).fork(console.log, function (res) {
+//     console.log(res)
+// })
 
 // Exercise 6
 // ==========
 // Write a function that uses checkActive() and showWelcome() to grant access or return the error
 
-var showWelcome = _.compose(_.add( "Welcome "), _.prop('name'));
+const showWelcome = _.compose(_.concat("Welcome "),  _.prop('name'));
 
-var checkActive = function(user) {
- return user.active ? Right.of(user) : Left.of('Your account is not active')
+const checkActive = function (user) {
+    console.log(Either.of(user));
+    return user.active ? Either.of(user) : left('Your account is not active')
 };
 
-var ex6 = _.compose(_.map(showWelcome), checkActive);
+const ex6 = _.compose(_.map(showWelcome), checkActive);
 
 
 
@@ -80,8 +88,8 @@ var ex6 = _.compose(_.map(showWelcome), checkActive);
 // ==========
 // Write a validation function that checks for a length > 3. It should return Right(x) if it is greater than 3 and Left("You need > 3") otherwise
 
-var ex7 = function(x) {
-  return x.length > 0 ? Right.of(x) : Left.of("You need > 3");  // <--- write me. (don't be pointfree)
+var ex7 = function (x) {
+    return x.length > 3 ? Either.of(x) : left("You need > 3");  // <--- write me. (don't be pointfree)
 };
 
 
@@ -90,16 +98,16 @@ var ex7 = function(x) {
 // ==========
 // Use ex7 above and Either as a functor to save the user if they are valid or return the error message string. Remember either's two arguments must return the same type.
 
-var save = function(x) {
-  return new IO(function() {
-    console.log("SAVED USER!");
-    return x + '-saved';
-  });
+var save = function (x) {
+    return new IO(function () {
+        console.log("SAVED USER!");
+        return x + '-saved';
+    });
 };
 
-var ex8 = _.compose(_.map(save), ex7);
+// var ex8 = _.compose(_.map(save), ex7);
 
 // Remember either's two arguments must return the same type.
-const ex8 = _.compose(_.either(IO.of, save), ex7); // 因为要输出同样的类型，如果是map， Right -> IO, Left -> String
+const ex8 = _.compose(either(IO.of, save), ex7); // 因为要输出同样的类型，如果是map， Right -> IO, Left -> String
 
-module.exports = {ex1: ex1, ex2: ex2, ex3: ex3, ex4: ex4, ex5: ex5, ex6: ex6, ex7: ex7, ex8: ex8};
+export { ex1, ex2, ex3, ex4_1, ex4_2, ex5, ex6, ex7, ex8 };

@@ -299,6 +299,7 @@ class IO {
 
   join() {
     return new IO(() => this.unsafePerformIO().unsafePerformIO());
+    // return this.unsafePerformIO()
   }
 }
 

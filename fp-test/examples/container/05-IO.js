@@ -58,7 +58,12 @@ console.log(io_window.map(R.prop('location')).map(R.prop('href')).map(R.split('/
 ////// 纯代码库: lib/params.js ///////
 
 //  url :: IO String
-var url = new IO(function() { return window.location.href; });
+var url = new IO(function() { return window.location.href; }); // 这里是new
+// 等价于 
+// var url = IO.of(window.location.href);
+// 不等价于这个 
+// var url = IO.of(function() { return window.location.href; });
+// console.log(url.__value())
 
 //  toPairs =  String -> [[String]]
 var toPairs = R.compose(R.map(R.split('=')), R.split('&'));
@@ -72,6 +77,7 @@ var findParam = function(key) {
 };
 
 console.log(findParam("key"))
+// new IO(R.compose(R.compose(Maybe.of, R.filter(R.compose(_.eq(key), R.head)), params), window.location.href))
 
 ////// 非纯调用代码: main.js ///////
 

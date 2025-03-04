@@ -1,4 +1,4 @@
-import { Either, IO, Maybe, compose, map, curry, toUpperCase } from "../../utils/support.js";
+import { Either, IO, Maybe, compose, map, curry, toUpperCase, Right } from "../../utils/support.js";
 import Task from "data.task";
 
 
@@ -81,3 +81,67 @@ Maybe.of(3).chain(function (three) {
 
 Maybe.of(null).chain(safeProp('address')).chain(safeProp('street'));
 // Maybe(null);
+
+
+///////////////////////////////
+const path = 'd:/Star_Code/A_Study/unocss-practice/fp-test/examples/monad/test.txt'
+
+const readFile = (filename) => new IO(() => {
+    console.log(`Reading ${filename}...`);
+    return `Content of ${filename}`;
+});
+
+const print = (content) => new IO(() => {
+    console.log(`Printed: ${content}`);
+    return content;
+});
+
+// 组合操作（返回 IO(IO)）
+const readAndPrint = readFile(path).map(print); // IO(IO)
+// deepseek IO =>
+// readFile(path) => new IO(() => {
+//     console.log(`Reading ${filename}...`);
+//     return `Content of ${filename}`;
+// });
+// IO(() => {
+//     console.log(`Reading ${path}...`);
+//     return `Content of ${path}`;
+// }).map(print);
+// IO(this.unsafePerformIO).chain(x => IO.of(print(x)))
+// new IO(() => (x => IO.of(print(x))(this.unsafePerformIO()).unsafePerformIO())
+// IO(() => IO(() => print(this.unsafePerformIO())).unsafePerformIO())
+// IO(() => print(this.unsafePerformIO()))
+// IO(() => compose(print, this.unsafePerformIO)())
+
+// support.js map => new IO(compose(print, this.unsafePerformIO))
+
+
+// 展平嵌套 IO
+const flattened = readAndPrint.join(); // 等价于 readAndPrint.chain(id)
+// deepseek IO =>
+// => IO(() => print(this.unsafePerformIO())).chain(x => x);
+// => new IO(() => (x => x)(this.unsafePerformIO()).unsafePerformIO());
+// => IO(() => (x => x)(print(this.unsafePerformIO())).unsafePerformIO())
+// => IO(() => print(this.unsafePerformIO()).unsafePerformIO())
+
+// support.js map().join()
+// IO(compose(print, this.unsafePerformIO)).join()
+// IO(() => compose(print, this.unsafePerformIO)().unsafePerformIO())
+// IO(() => print(this.unsafePerformIO()).unsafePerformIO())
+
+flattened.unsafePerformIO();
+// 输出:
+// Reading test.txt...
+// Printed: Content of test.txt
+
+
+
+
+//////////////////////////
+// readFile :: Filename -> Either String (Task Error String)
+// httpPost :: String -> String -> Task Error JSON
+// upload :: Filename -> Either String (Task Error JSON)
+const upload = compose(map(chain(httpPost('/uploads'))), readFile);
+
+// Either.of(String).map(chain(httpPost('/uploads')));
+// Either.of(chain(httpPost('/uploads'))(String))

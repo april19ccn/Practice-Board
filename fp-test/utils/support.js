@@ -295,6 +295,9 @@ class IO {
   // ----- Monad IO
   chain(fn) {
     return this.map(fn).join();
+    // this.map(fn) => IO(compose(fn, this.unsafePerformIO))
+    // .join() => new IO ( () => compose(fn, this.unsafePerformIO)().unsafePerformIO())
+    // => new IO ( () => f(this.unsafePerformIO()).unsafePerformIO() )
   }
 
   join() {

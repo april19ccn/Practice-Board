@@ -1,8 +1,7 @@
-
-
 import { curry, compose } from "./function.js";
 
 /* ARRAY */
+
 export const map = curry(function(fp, arr) {
     return arr.map(fp);
 })

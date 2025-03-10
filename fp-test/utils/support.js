@@ -297,7 +297,7 @@ class IO {
     return this.map(fn).join();
     // this.map(fn) => IO(compose(fn, this.unsafePerformIO))
     // .join() => new IO ( () => compose(fn, this.unsafePerformIO)().unsafePerformIO())
-    // => new IO ( () => f(this.unsafePerformIO()).unsafePerformIO() )
+    // => new IO ( () => fn(this.unsafePerformIO()).unsafePerformIO() ) // fn -> IO
   }
 
   join() {

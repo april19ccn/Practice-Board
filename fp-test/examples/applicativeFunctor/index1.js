@@ -135,3 +135,10 @@ var u = Maybe.of(_.toUpper);
 var v = Maybe.of(_.concat("& beyond"));
 var w = Maybe.of("blood bath ");
 
+Maybe.of(compose).ap(Maybe.of(_.toUpper)).ap(Maybe.of(_.concat("& beyond"))).ap(Maybe.of("blood bath "))
+= Maybe.of(_.toUpper).map(compose).ap(Maybe.of(_.concat("& beyond"))).ap(Maybe.of("blood bath "))
+= Maybe.of(compose(_.toUpper)).ap(Maybe.of(_.concat("& beyond"))).ap(Maybe.of("blood bath "))
+= Maybe.of(_.concat("& beyond")).map(compose(_.toUpper)).ap(Maybe.of("blood bath "))
+= Maybe.of(compose(_.toUpper)(_.concat("& beyond"))).ap(Maybe.of("blood bath "))
+= Maybe.of("blood bath ").map(compose(_.toUpper)(_.concat("& beyond")))
+= Maybe.of(compose(_.toUpper)(_.concat("& beyond"))("blood bath "))

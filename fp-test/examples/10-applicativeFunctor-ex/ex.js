@@ -23,7 +23,8 @@ var ex1 = function (x, y) {
 // Now write a function that takes 2 Maybe's and adds them. Use liftA2 instead of ap().
 
 //  ex2 :: Maybe Number -> Maybe Number -> Maybe Number
-var ex2 = (x, y) =>liftA2(_.add, x, y);
+// var ex2 = (x, y) =>liftA2(_.add, x, y);
+var ex2 = liftA2(_.add)
 
 
 
@@ -50,7 +51,8 @@ var getCache = function (x) {
 var game = _.curry(function (p1, p2) { return p1 + ' vs ' + p2; });
 
 //  ex4 :: IO String
-var ex4 = IO.of(game).ap(getCache("player1")).ap(getCache("player2"));
+// var ex4 = IO.of(game).ap(getCache("player1")).ap(getCache("player2"));
+const ex4 = liftA2(game, getCache("player1"), getCache("player2"))
 
 
 

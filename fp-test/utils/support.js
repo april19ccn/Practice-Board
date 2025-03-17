@@ -215,7 +215,7 @@ class Right extends Either {
 
   // ----- Traversable (Either a)
   sequence(of) {
-    return this.traverse(of, identity);
+    return this.traverse(of, identity); // this.$value.map(Either.of);
   }
 
   traverse(of, fn) {

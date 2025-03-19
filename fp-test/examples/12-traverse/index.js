@@ -54,18 +54,18 @@ traverse(Either.of, fromPredicate(isEven))([2, 3, 4])
         Either.of(new List([])),
     )
 
-a = 2
+// a = 2 ：
 
-(Either.of([]), 2) => fromPredicate(isEven)(2).map(b => bs => bs.concat(b)).ap(Either.of([]))
+// (Either.of([]), 2) => fromPredicate(isEven)(2).map(b => bs => bs.concat(b)).ap(Either.of([]))
 
-// fromPredicate(isEven)(2) => Right(2)
-(Either.of([]), 2) => Right(2).map(b => bs => bs.concat(b)).ap(Either.of([]))
+// // fromPredicate(isEven)(2) => Right(2)
+// (Either.of([]), 2) => Right(2).map(b => bs => bs.concat(b)).ap(Either.of([]))
 
-// Right(2).map(b => bs => bs.concat(b))
-(Either.of([]), 2) => Right(bs => bs.concat(2)).ap(Either.of([]))
+// // Right(2).map(b => bs => bs.concat(b))
+// (Either.of([]), 2) => Right(bs => bs.concat(2)).ap(Either.of([]))
 
-// Either.of(x) => new Right(x)
-(Right([]), 2) => Right(bs => bs.concat(2)).ap(Right([]))
+// // Either.of(x) => new Right(x)
+// (Right([]), 2) => Right(bs => bs.concat(2)).ap(Right([]))
 
 
 // reduce :: [a] -> (f -> a -> f) -> f -> f
@@ -76,3 +76,28 @@ a = 2
 // - 第一个`f`是初始值`of(new List([]))`（比如`Either.of([])`）
 
 // - 第二个`f`是最终返回的结果（比如`Right([2])`或`Left(...)`）
+
+
+
+/////////////////////////////////////////////
+
+// getAttribute :: String -> Node -> Maybe String
+// $ :: Selector -> IO Node
+
+// getControlNode :: Selector -> IO (Maybe Node)
+// const getControlNode = compose(
+//     chain(traverse(IO.of, $)),
+//     map(getAttribute('aria-controls')),
+//     $
+// );
+
+// getControlNode("test")
+
+// $("test") -> IO(Node)
+// IO(Node) -> IO(Maybe(Node-'aria-controls'))
+// IO(Maybe(Node-'aria-controls')).chain(traverse(IO.of, $)) 
+// -> IO(Maybe(Node-'aria-controls')).map(traverse(IO.of, $)).join()
+// -> IO(traverse(IO.of, $)(Maybe(Node-'aria-controls'))).join()
+// -> IO(Maybe($ Node-'aria-controls'))
+
+

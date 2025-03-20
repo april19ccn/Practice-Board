@@ -8,8 +8,35 @@ const always = curry((a, b) => a);
 
 
 // compose :: ((a -> b), (b -> c),  ..., (y -> z)) -> a -> z
-const compose = (...fns) => (...args) => fns.reduceRight((res, fn) => [fn.call(null, ...res)], args)[0];
+// const compose = (...fns) => (...args) => fns.reduceRight((res, fn) => [fn.call(null, ...res)], args)[0];
 
+// NOTE A slightly pumped up version of `compose` which also keeps track of the chain
+// of callees. In the end, a function created with `compose` holds a `callees` variable
+// with the list of all the callees' names.
+// This is useful to provide insights during validation of exercises
+function compose(...fns) {
+    const n = fns.length;
+  
+    return function $compose(...args) {
+      $compose.callees = [];
+  
+      let $args = args;
+  
+      for (let i = n - 1; i >= 0; i -= 1) {
+        const fn = fns[i];
+  
+        // assert(
+        //   typeof fn === 'function',
+        //   `Invalid Composition: ${ordinal(n - i)} element in a composition isn't a function`,
+        // );
+  
+        $compose.callees.push(fn.name);
+        $args = [fn.call(null, ...$args)];
+      }
+  
+      return $args[0];
+    };
+}
 
 // curry :: ((a, b, ...) -> c) -> a -> b -> ... -> c
 function curry(fn) {
@@ -219,7 +246,7 @@ class Right extends Either {
   }
 
   traverse(of, fn) {
-    fn(this.$value).map(Either.of);
+    return fn(this.$value).map(Either.of);
   }
 }
 
@@ -353,10 +380,15 @@ class Map {
 //     return `Map(${inspect(this.$value)})`;
 //   }
 
-  insert(k, v) {
+//   insert(k, v) {
+//     const singleton = {};
+//     singleton[k] = v;
+//     return Map.of(Object.assign({}, this.$value, singleton));
+//   }
+insert(k, v) {
     const singleton = {};
     singleton[k] = v;
-    return Map.of(Object.assign({}, this.$value, singleton));
+    return new Map(Object.assign({}, this.$value, singleton));
   }
 
   reduceWithKeys(fn, zero) {

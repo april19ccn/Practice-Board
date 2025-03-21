@@ -72,11 +72,28 @@ describe("Traverse", function () {
         expect(res.$value).toEqual('game started!')
 
         const rej = E.startGame(new List([gary, { what: 14 }]));
-        expect(rej.isLeft).toBe(false)
+        console.log(rej)
+        expect(rej.isLeft).toBe(true)
         expect(rej.$value).toEqual('must have name')
     });
 
     test('Exercise 3', function () {
+        const res = E.readFirst('__dirname');
 
+        const throwUnexpected = () => {
+            throw new Error('The function gives incorrect results; a Task has resolved unexpectedly!');
+        };
+
+        expect(res).toBeInstanceOf(Task)
+
+        return new Promise((done) => {
+            res.fork(throwUnexpected, function (val) {
+                expect(val).toBeInstanceOf(Maybe)
+                expect(val.isJust).toBe(true)
+                expect(val.$value).toEqual('content of file1 (utf-8)')
+
+                done();
+            });
+        })
     });
 });

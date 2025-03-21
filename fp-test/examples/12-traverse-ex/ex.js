@@ -1,4 +1,4 @@
-import { always,Map, curry, IO, Maybe, Either, Identity, left, compose, chain, map, sequence, traverse } from "../../utils/support.js";
+import { always, Map, curry, safeHead, IO, Maybe, Either, Identity, left, compose, chain, map, sequence, traverse } from "../../utils/support.js";
 import Task from "data.task";
 
 /* ---------- Chapter 12 ---------- */
@@ -6,22 +6,22 @@ import Task from "data.task";
 const httpGet = function httpGet(route) { return Task.of(`json for ${route}`); };
 
 const routes = new Map({
-  '/': '/',
-  '/about': '/about',
+    '/': '/',
+    '/about': '/about',
 });
 
 const validate = function validate(player) {
-  return player.name
-    ? Either.of(player)
-    : left('must have name');
+    return player.name
+        ? Either.of(player)
+        : left('must have name');
 };
 
 const readdir = function readdir(dir) {
-  return Task.of(['file1', 'file2', 'file3']);
+    return Task.of(['file1', 'file2', 'file3']);
 };
 
 const readfile = curry(function readfile(encoding, file) {
-  return Task.of(`content of ${file} (${encoding})`);
+    return Task.of(`content of ${file} (${encoding})`);
 });
 
 
@@ -61,6 +61,54 @@ export const getJsons = compose(sequence(Task.of), map(httpGet));
 // Player:: [a]
 // map(validate) :: [Player] -> [Either Error Player]
 
-export const startGame = compose(traverse(Either.of, map(always('game started!'))), map(validate));
+// export const startGame = compose(traverse(Either.of, map(always('game started!'))), map(validate));
 
-traverse(Either.of, validate)([albert, theresa])
+export const startGame = compose(map(always('game started!')), traverse(Either.of, validate));
+// new List([albert, theresa])
+// => Right([albert, theresa])
+// => Right(always('game started!')([albert, theresa]))
+
+// new List([gary, { what: 14 }])
+// => validate => [Right(gary), Left('must have name')]
+
+
+// [gary, { what: 14 }].traverse(Either.of, validate)
+//     = [gary, { what: 14 }].reduce(
+//         (f, a) => validate(a).map(b => bs => bs.concat(b)).ap(f),
+//         Either.of(new List([])),
+//     );
+//     // gary
+//     = (Either([]), gary) => validate(gary).map(b => bs => bs.concat(b)).ap(Either([]))
+//     = Either(bs => bs.concat(gary)).ap(Either([]))
+//     = Either([]).map(bs => bs.concat(gary))
+//     = Either([gary])
+//     // { what: 14 }
+//     = (Either([gary]), { what: 14 }) => validate({ what: 14 }).map(b => bs => bs.concat(b)).ap(Either([gary]))
+//     = left('must have name').map(b => bs => bs.concat(b)).ap(Either([gary]))
+//     = left('must have name')
+
+// ex3 ---------------------------------------------
+// Considering the following functions:
+//
+//   readfile :: String -> String -> Task Error String
+//   readdir :: String -> Task Error [String]
+//
+// Use traversable to rearrange and flatten the nested Tasks & Maybe
+
+// readFirst :: String -> Task Error (Maybe (Task Error String))
+// export const readFirst = compose(map(map(readfile('utf-8'))), map(safeHead), readdir);
+
+export const readFirst = compose(
+    chain(traverse(Task.of, readfile('utf-8'))),
+    map(safeHead),
+    readdir
+)
+
+
+// Maybe (Task Error String)
+const readFirst_1 = compose(
+    // chain(),
+    sequence(Maybe.of),
+    map(safeHead),
+    readdir,
+) 

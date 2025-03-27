@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
-        "noEmitOnError": true
+        // "noEmit": true, // 不生成编译后的文件
+        "noEmitOnError": true // 有错误时不生成编译后的文件
     },
     "include": ["./"],
 }

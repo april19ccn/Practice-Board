@@ -33,6 +33,14 @@ interface Person {
     [propName: string]: string | number;
 }
 
+interface Person2 {
+    name: string;
+    age?: number;
+    x: () => void;
+    // 1: () => void; // 类型“() => void”的属性“1”不能赋给“number”索引类型“string | number”。
+    [propName: number]: string | number;
+}
+
 let tom: Person = {
     name: 'Tom',
     age: 25,

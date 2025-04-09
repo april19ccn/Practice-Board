@@ -1,11 +1,11 @@
-// interface 能用type替代吗
+// interface 能用type替代吗？ 不能
 type Alarm = {
     alert(): void;
 }
 
-type LightableAlarm extends Alarm ={
-    lightOn(): void;
-    lightOff(): void;
-}
+// type LightableAlarm extends Alarm ={
+//     lightOn(): void;
+//     lightOff(): void;
+// }
 
 // interface 和 abstract class 的区别

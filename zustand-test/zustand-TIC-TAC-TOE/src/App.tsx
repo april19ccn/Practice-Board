@@ -1,11 +1,22 @@
-import Board from "./components/Board"
+// TEST-COMPONENTS
+import Board from "./components/Board";
+
+// TEST-EXAMPLES
+import TestUpdating from "./examples/TestUpdating";
+
+// TEST-THIRD
+import TestImmer from "./test-ex/immer";
 
 function App() {
-  return (
-    <>
-        <Board />
-    </>
-  )
+    console.log("TestImmer------", TestImmer);
+
+    return (
+        <>
+            <Board />
+
+            <TestUpdating></TestUpdating>
+        </>
+    );
 }
 
-export default App
+export default App;

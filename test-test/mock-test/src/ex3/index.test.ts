@@ -1,9 +1,14 @@
-import { describe, test, expect, vi } from 'vitest'
-import { getAllGoods } from './index'
+import { beforeEach, describe, test, expect, vi } from 'vitest'
+import { getAllGoods, getGoods } from './index'
 import axios from 'axios'
 
-// 使用 jset.mock 自動模擬整個 axios 模組
+// 使用 vi.mock 自動模擬整個 axios 模組
 vi.mock('axios')
+
+beforeEach(() => {
+    // 每次测试前重置所有 Mock 状态
+    vi.mocked(axios.get).mockReset()
+})
 
 test('should fetch goods', () => {
     const goods = [{ name: 'Milk' }, { name: 'Apple' }]
@@ -24,6 +29,27 @@ test('should fetch goods', () => {
         expect(resp[0].name).toEqual('Milk')
     })
 })
+
+test("many api", async () => {
+    const mockListData = [{ id: 100 }, { id: 200 }]
+    const mockGoodsData = { id: 100, name: "测试商品" }
+
+    // 1. 分两次模拟 axios.get 的返回值
+    vi.mocked(axios.get)
+        .mockResolvedValueOnce({ data: mockListData }) // 第一次调用返回列表
+        .mockResolvedValueOnce({ data: mockGoodsData }) // 第二次调用返回商品详情
+
+    // 2. 执行待测函数
+    const result = await getGoods(999) // 注意：参数 999 实际未使用
+
+    // 3. 验证结果
+    expect(result).toEqual(mockGoodsData)
+
+    // 4. 验证调用顺序和参数
+    expect(axios.get).toHaveBeenNthCalledWith(1, 'url/goods-list')
+    expect(axios.get).toHaveBeenNthCalledWith(2, 'url/goods/100')
+})
+
 
 // 「1」
 // vi.mocked

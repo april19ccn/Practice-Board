@@ -62,4 +62,4 @@ describe('Test calulate the price', () => {
 //     new (...args: Parameters<T>): ReturnType<T>;
 //     (...args: Parameters<T>): ReturnType<T>;
 // }
-// type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : never;
+// type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : never; // TypeScript 内置工具类型，提取函数 T 的参数类型

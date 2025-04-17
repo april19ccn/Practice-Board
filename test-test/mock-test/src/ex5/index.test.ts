@@ -16,6 +16,9 @@ describe("Test Lottery", () => {
         console.log(mockRandom.mock.calls)
 
         expect(mockRandom.mock.calls.length).toBe(2)
+        
+        mockRandom.mockRestore() // 重置mock
+        expect(Math.random).not.toBe(mockRandom)
     })
 })
 

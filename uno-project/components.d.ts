@@ -35,8 +35,6 @@ declare module 'vue' {
     NListItem: typeof import('naive-ui')['NListItem']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NProgress: typeof import('naive-ui')['NProgress']
-    NRadioButton: typeof import('naive-ui')['NRadioButton']
-    NRadioGroup: typeof import('naive-ui')['NRadioGroup']
     NSpace: typeof import('naive-ui')['NSpace']
     NTooltip: typeof import('naive-ui')['NTooltip']
     RouterLink: typeof import('vue-router')['RouterLink']

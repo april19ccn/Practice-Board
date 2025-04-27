@@ -24,6 +24,9 @@ import LayoutTest from './modules/LayoutTest.vue';
 import ProgressTest from './modules/ProgressTest.vue';
 import ColorTest from './modules/ColorTest.vue';
 import CardFlex from './modules/CardFlex.vue';
+
+console.log("!!!!!!!!!!!!!!!")
+console.log(test)
 </script>
 
 <style scoped></style>

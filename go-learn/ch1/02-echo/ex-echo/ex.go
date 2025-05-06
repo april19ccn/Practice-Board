@@ -2,15 +2,17 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func printCommandName() {
+func printCommandName(writer io.Writer) {
 	fmt.Println("命令名：")
-	fmt.Println(os.Args[0])
+	// fmt.Println(os.Args[0])
+	fmt.Fprintf(writer, "%s\n", os.Args[0])
 }
 
 func printCommandArgs() {
@@ -53,7 +55,7 @@ func main() {
 	fmt.Println(strings.Join(os.Args[0:], " "))
 
 	// 练习 1.1
-	printCommandName()
+	printCommandName(os.Stdout)
 
 	// 练习 1.2
 	printCommandArgs()

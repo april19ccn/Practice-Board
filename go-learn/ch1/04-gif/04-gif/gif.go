@@ -44,10 +44,10 @@ func lissajous(out io.Writer) {
 	freq := rand.Float64() * 3.0        // relative frequency of y oscillator
 	anim := gif.GIF{LoopCount: nframes} // 一个struct结构体
 	phase := 0.0                        // phase difference
-	for i := 0; i < nframes; i++ {
+	for i := 0; i < nframes; i++ {      // 外层循环会循环64次，每一次都会生成一个单独的动画帧
 		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
 		img := image.NewPaletted(rect, palette)
-		for t := 0.0; t < cycles*2*math.Pi; t += res {
+		for t := 0.0; t < cycles*2*math.Pi; t += res { // 内层循环设置两个偏振值
 			x := math.Sin(t)
 			y := math.Sin(t*freq + phase)
 			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5),

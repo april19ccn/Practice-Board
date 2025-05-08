@@ -1,0 +1,14 @@
+1.12s    62366  https://golang.org
+1.18s    33482  https://godoc.org
+1.98s     4154  http://gopl.io
+1.98s elapsed
+===============分 割 线===============
+0.55s     4154  http://gopl.io
+0.56s    33482  https://godoc.org
+0.57s    62366  https://golang.org
+2.55s elapsed
+===============分 割 线===============
+0.56s    62366  https://golang.org
+0.57s     4154  http://gopl.io
+0.63s    33482  https://godoc.org
+3.18s elapsed

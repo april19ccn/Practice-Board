@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	tempconv "example/learn/ch2/06-package/ex-1"
+	tempconv "example/learn/ch2/06-package/ex-1/tempconv"
 )
 
 func main() {

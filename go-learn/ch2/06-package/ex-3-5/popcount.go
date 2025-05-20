@@ -23,6 +23,16 @@ func PopCount(x uint64) int {
 		pc[byte(x>>(7*8))])
 }
 
+// 2.3
+func PopCountLoop(x uint64) int {
+	result := 0
+	for i := 0; i < 8; i++ {
+		result += int(pc[byte(x>>(i*8))])
+	}
+	return result
+}
+
+// 2.4
 func PopCountFor(x uint64) int {
 	result := 0
 	for x != 0 {
@@ -32,7 +42,19 @@ func PopCountFor(x uint64) int {
 	return result
 }
 
+// 2.5
+func PopCountDel(x uint64) int {
+	result := 0
+	for x != 0 {
+		x = x & (x - 1)
+		result++
+	}
+	return result
+}
+
 func main() {
 	fmt.Println(PopCount(184467440737095))
+	fmt.Println(PopCountLoop(184467440737095))
 	fmt.Println(PopCountFor(184467440737095))
+	fmt.Println(PopCountDel(184467440737095))
 }

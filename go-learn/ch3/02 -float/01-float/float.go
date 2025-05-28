@@ -23,4 +23,8 @@ func main() {
 	fmt.Println(math.Inf(1) == 1/z)
 	fmt.Println(math.Inf(1) == math.Inf(1))  // true（同符号无穷相等）
 	fmt.Println(math.Inf(1) == math.Inf(-1)) // false（符号不同）
+
+	// 检查正无穷
+	x := math.Inf(1)               // 正无穷
+	fmt.Println(math.IsInf(x, 12)) // true
 }

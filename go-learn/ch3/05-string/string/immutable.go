@@ -1,3 +1,4 @@
+// 探究字符串底层原理
 package main
 
 import (
@@ -6,27 +7,18 @@ import (
 	"unsafe"
 )
 
-func splice() {
-	s := "hello, world"
-	fmt.Println(len(s))             // "12"
-	fmt.Println(string(s[0]), s[7]) // "104 119" ('h' and 'w')
-	fmt.Println(s[0:5])             // "hello"
-
-	fmt.Println(s[:5]) // "hello"
-	fmt.Println(s[7:]) // "world"
-	fmt.Println(s[:])  // "hello, world"
-}
+// 注意区分变量地址和数据地址
 
 // 获取字符串底层数据指针
 func stringPtr(s string) uintptr {
 	return (*reflect.StringHeader)(unsafe.Pointer(&s)).Data
 }
 
-func immutable() {
+func Immutable() {
 	s := "left foot"
 	fmt.Println("s 开始前地址：", &s)
-	// ptr1 := stringPtr(s)
-	ptr1 := unsafe.Pointer(&s)
+	// ptr1 := stringPtr(s) // 获取变量s中存的字符串的数据地址
+	ptr1 := unsafe.Pointer(&s) // 获取变量s的地址
 	fmt.Println("ptr1 开始前地址：", ptr1)
 
 	t := s
@@ -52,7 +44,8 @@ func immutable() {
 	fmt.Println("x 开始后地址：", &x)
 }
 
-func immutable_num() {
+// 对应基本类型 int bool 等，数据地址就是变量地址
+func Immutable_num() {
 	s := 1234
 	fmt.Println("s 开始前地址：", &s)
 
@@ -68,7 +61,7 @@ func immutable_num() {
 	fmt.Println("t 开始后地址：", &t)
 }
 
-func immutable_array() {
+func Immutable_array() {
 	s := [3]int{1, 2, 3}
 	fmt.Println("s 开始前地址：", &s[0])
 	// 获取数组首元素地址（即底层数据起始指针）
@@ -87,9 +80,6 @@ func immutable_array() {
 	fmt.Println("t 开始后地址：", &t)
 }
 
-func main() {
-	splice()
-	immutable()
-	immutable_num()
-	immutable_array()
-}
+// Immutable_array 可以看到数组两个底层数据地址是不一致的，可以推出 t := s，是 s 的拷贝值
+
+// Immutable 可以看到底层的字符串地址是一样的，而 t := s, 并不是 s 的拷贝值，而是因为底层字符串不可以改变的性质，保证了 t 依然是旧的字符串

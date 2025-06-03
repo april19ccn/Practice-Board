@@ -83,6 +83,33 @@ func StringLen() {
 		i += size
 	}
 
+	// Go语言的range循环在处理字符串的时候，会自动隐式解码UTF8字符串。
+	for i, r := range "Hello, 世界" {
+		fmt.Printf("%d\t%q\t%d\n", i, r, r)
+	}
+
+	// 用一个简单的循环来统计字符串中字符的数目
+	n := 0
+	for _, _ = range s {
+		n++
+	}
+	// for range s { // 可以忽略不需要的变量
+	// 	n++
+	// }
+	fmt.Println("n = ", n)
+}
+
+func RuneAndUtf8() {
+	// "program" in Japanese katakana
+	s := "プログラム"
+	fmt.Printf("% x\n", s) // "e3 83 97 e3 83 ad e3 82 b0 e3 83 a9 e3 83 a0"
+	r := []rune(s)
+	fmt.Println(r)
+	fmt.Printf("%x\n", r) // "[30d7 30ed 30b0 30e9 30e0]"
+	fmt.Println(string("\\u30d7"))
+	fmt.Println(rune('\u30d7'), string('\u30ed'), string(rune(12464)), '\u30e9', '\u30e0')
+	// fmt.Println(string(12464)) // グ // 从未键入的 int 转换为字符串时，得到的是一个符文字符串，而不是一个数字字符串
+	fmt.Println(string(r))
 }
 
 func main() {
@@ -102,5 +129,6 @@ func main() {
 	// fmt.Println(HasSuffix("hello", "lo"))
 	// fmt.Println(Contains("hello", "ll"))
 
-	StringLen()
+	// StringLen()
+	RuneAndUtf8()
 }

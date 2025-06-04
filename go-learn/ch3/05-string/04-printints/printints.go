@@ -42,9 +42,10 @@ func intsToString(values []int) string {
 		buf = append(buf, []byte(strconv.Itoa(v))...)
 	}
 	buf = append(buf, ']')
+	fmt.Println(buf)
 	return string(buf)
 }
 
 func main() {
-	fmt.Println(intsToString([]int{1, 2, 3})) // "[1, 2, 3]"
+	fmt.Println(intsToString([]int{1, 2, 3, 0, '~'})) // "[1, 2, 3]"  // '~' 被视为126
 }

@@ -15,6 +15,7 @@ func main() {
 	// 程序使用短变量声明创建 bufio.Scanner 类型的变量 input
 	// os 包是 Go 语言标准库中的一个系统相关包，os.Stdin 代表标准输入，也就是程序运行时从键盘输入的数据。
 	// 它是一个 *os.File 类型的对象，可用来读取输入数据。
+	// Scanner，用于处理数据读取的简单任务，支持按行、按单词等方式读取，一般用于一些简单的读取场景。注意：Scanner 默认是按行读取，可以调用 Split 方法修改读取方式。
 	input := bufio.NewScanner(os.Stdin)
 
 	/**

@@ -31,4 +31,11 @@ func main() {
 	// 超过len，但小于cap会扩展slice
 	endlessSummer := summer[:5] // extend a slice (within capacity)
 	fmt.Println(endlessSummer)  // "[June July August September October]"
+
+	// 复制一个slice只是对底层的数组创建了一个新的slice别名
+	fmt.Println("-------------------")
+	Q2[2] = "Apple"
+	fmt.Println(Q2)     // [April May Apple]
+	fmt.Println(summer) // [Apple July August]
+	fmt.Println(months) // [January February March April May Apple July August September October November December]
 }

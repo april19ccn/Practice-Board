@@ -1,8 +1,10 @@
 package main
 
-func appendInt(x []int, y int) []int {
+import "fmt"
+
+func appendInt(x []int, y ...int) []int {
 	var z []int
-	zlen := len(x) + 1
+	zlen := len(x) + len(y)
 
 	if zlen <= cap(x) { // 每次调用appendInt函数，必须先检测slice底层数组是否有足够的容量来保存新添加的元素
 		// 如果有足够空间的话，直接扩展slice（依然在原有的底层数组之上）
@@ -19,10 +21,19 @@ func appendInt(x []int, y int) []int {
 		copy(z, x)
 	}
 
-	z[len(x)] = y
+	copy(z[len(x):], y)
 	return z
 }
 
 func main() {
-	appendInt([]int{1, 2, 3}, 4)
+	fmt.Println(appendInt([]int{1, 2, 3}, 4))
+
+	fmt.Println(appendInt([]int{1, 2, 3}, []int{3, 4, 5}...))
+
+	var x, y []int
+	for i := 0; i < 10; i++ {
+		y = appendInt(x, i)
+		fmt.Printf("%d cap=%d\t%v\n", i, cap(y), y)
+		x = y
+	}
 }

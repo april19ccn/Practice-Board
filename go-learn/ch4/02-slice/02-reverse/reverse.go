@@ -30,5 +30,5 @@ func main() {
 	reverse(k)
 	reverse(k[:2])
 	reverse(k[2:])
-	fmt.Println(k)
+	fmt.Println(k) // [4 5 0 1 2 3]
 }

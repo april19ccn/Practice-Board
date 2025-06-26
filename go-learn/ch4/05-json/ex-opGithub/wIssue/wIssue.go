@@ -60,6 +60,17 @@ func GetIssueDescription() (string, error) {
 	return description, nil
 }
 
+// 测试用(vim需要终端全部控制权，测试时无法使用)
+func CheckGetIssueDescription() (string, error) {
+	tmpfile, _ := createTempFile("# 在此输入 Issue 描述， test 文本\n")
+	description, err := getEditedContent(tmpfile)
+	if err != nil {
+		return "", err
+	}
+
+	return description, nil
+}
+
 // func main() {
 // 	tmpfile, _ := createTempFile("# 在此输入 Issue 描述\n")
 // 	openEditor(tmpfile)

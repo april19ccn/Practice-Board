@@ -19,7 +19,7 @@ import (
 // 	PerPage:   30,
 // }
 
-var params = opIssue.CreateParams{
+var params = opIssue.IssueParams{
 	Title: "test10",
 	Body:  "test test",
 }

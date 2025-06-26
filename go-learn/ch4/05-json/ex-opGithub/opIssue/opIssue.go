@@ -16,9 +16,9 @@ const testToken = ""
 
 const IssuesURL = "https://api.github.com/" + "repos/" + testOWNER + "/" + testREPO + "/issues"
 
-type CreateParams struct {
-	Title string
-	Body  string
+type IssueParams struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
 }
 
 type IssueData struct {
@@ -54,9 +54,19 @@ func handleResponse(req *http.Request, okCode int) (*IssueData, error) {
 }
 
 // 创建 issue
-func CreateIssue(params CreateParams) (*IssueData, error) {
-	data := []byte(fmt.Sprintf(`{"title": "%s", "body": "%s"}`, params.Title, params.Body))
-	fmt.Println(data)
+func CreateIssue(params IssueParams) (*IssueData, error) {
+	// 正确序列化
+	requestBody := IssueParams{
+		Title: params.Title,
+		Body:  params.Body,
+	}
+
+	data, err := json.Marshal(requestBody)
+	if err != nil {
+		return nil, err
+	}
+	// data := []byte(fmt.Sprintf(`{"title": "%s", "body": "%s"}`, params.Title, params.Body))
+	fmt.Println("SENDING JSON:", string(data))
 
 	req, err := http.NewRequest("POST", IssuesURL, bytes.NewBuffer(data))
 	if err != nil {
@@ -77,7 +87,7 @@ func GetIssue(issueNumber int) (*IssueData, error) {
 }
 
 // 更新 issue
-func UpdateIssue(issueNumber int, params CreateParams) (*IssueData, error) {
+func UpdateIssue(issueNumber int, params IssueParams) (*IssueData, error) {
 	data := []byte(fmt.Sprintf(`{"title": "%s", "body": "%s"}`, params.Title, params.Body))
 
 	req, err := http.NewRequest("PATCH", IssuesURL+"/"+strconv.Itoa(issueNumber), bytes.NewBuffer(data))

@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-var params = CreateParams{
-	Title: "test12",
+var params = IssueParams{
+	Title: "test15",
 	Body:  "test test",
 }
 
@@ -32,11 +32,11 @@ func TestCreateIssue(t *testing.T) {
 }
 
 func TestUpdateIssue(t *testing.T) {
-	params := CreateParams{
-		Title: "test-patch-3",
+	params := IssueParams{
+		Title: "test-patch-8",
 		Body:  "test test test",
 	}
-	result, err := UpdateIssue(5, params)
+	result, err := UpdateIssue(8, params)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestUpdateIssue(t *testing.T) {
 }
 
 func TestCloseIssue(t *testing.T) {
-	result, err := CloseIssue(3)
+	result, err := CloseIssue(9)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestCloseIssue(t *testing.T) {
 }
 
 func TestCreateIssueWithEditor(t *testing.T) {
-	params.Body, _ = wIssue.GetIssueDescription()
+	params.Body, _ = wIssue.CheckGetIssueDescription()
 	result, err := CreateIssue(params)
 	if err != nil {
 		log.Fatal(err)

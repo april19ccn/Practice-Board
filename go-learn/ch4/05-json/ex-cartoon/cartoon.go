@@ -44,10 +44,6 @@ func GetXKCDDir() (string, error) {
 		return "", err
 	}
 
-	if err := os.MkdirAll(targetDir, 0755); err != nil {
-		return "", err
-	}
-
 	return targetDir, nil
 }
 
@@ -104,6 +100,7 @@ func CreateXKCDFile(num int, XKCD *XKCD) error {
 	if err != nil {
 		return err
 	}
+	defer data.Close()
 
 	formattedJSON, err := json.MarshalIndent(XKCD, "", "  ")
 	if err != nil {

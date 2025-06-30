@@ -30,7 +30,7 @@ const OMDBAPI = "http://www.omdbapi.com/?apikey="
 
 // GetOMDBDir 返回OMDB下载目录
 func GetOMDBDir() (string, error) {
-	dir, err := os.Getwd()
+	dir, err := os.Getwd() // 获取当前工作目录
 	fmt.Println(dir)
 	if err != nil {
 		return "", err

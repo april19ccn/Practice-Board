@@ -20,7 +20,7 @@ func TestMax(t *testing.T) {
 func TestMin(t *testing.T) {
 	t.Parallel()
 	// got, err := Min(1, 2, 3, 4)
-	got, err := Min()
+	got, err := Min(1, 5, 6, 9, 10)
 	if err != nil {
 		t.Fatal(err)
 	}

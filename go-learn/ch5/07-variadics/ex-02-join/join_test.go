@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -88,9 +89,18 @@ func BenchmarkJoin(b *testing.B) {
 }
 
 // 示例用法
+// go test -v -run ExampleJoin
 func ExampleJoin() {
 	// Example usage
 	result := Join(" ", "hello", "world", "!")
-	println(result)
+	fmt.Println(result)
 	// Output: hello world !
 }
+
+// println()
+// println 内置函数以特定实现方式格式化参数，并将结果写入标准错误。参数之间总是会加上空格，并附加换行符。Println 在引导和调试时非常有用，但并不保证会保留在语言中。
+
+// 使用 println(result) 为什么控制台看不到结果 ？
+// 代码问题在于 ExampleJoin 函数中使用了 println 输出结果，
+// 而 Go 的示例测试（Example Test）只会捕获标准输出（stdout），
+// 但 println 函数默认输出到 标准错误（stderr），导致测试框架无法检测到输出内容。

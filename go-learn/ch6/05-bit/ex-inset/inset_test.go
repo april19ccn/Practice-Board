@@ -239,3 +239,13 @@ func TestElems(t *testing.T) {
 		t.Errorf("set.Elems() = %v, want %v", got, want)
 	}
 }
+
+// 验证同一个包里的封装性，可以访问到小写的words
+func TestEcapsulation(t *testing.T) {
+	var got = IntSet{}
+	got.Add(1)
+	got.Add(55)
+	got.Add(64)
+	got.Add(188)
+	fmt.Println(got.words)
+}

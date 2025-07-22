@@ -1,3 +1,5 @@
+// 验证defer的执行顺序
+// 等return执行完 执行defer
 package main
 
 import "fmt"

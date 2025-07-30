@@ -154,7 +154,7 @@ func main() {
 // socks: $5.00
 
 // http://localhost:8000/create?item=hat&price=25.5
-// create success! hat: 25.5
+// create success! hat: $25.50
 
 // http://localhost:8000/list
 // shoes: $50.00

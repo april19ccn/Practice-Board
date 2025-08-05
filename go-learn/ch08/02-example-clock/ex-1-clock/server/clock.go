@@ -13,20 +13,24 @@
 package main
 
 import (
+	"flag"
 	"io"
 	"log"
 	"net"
-	"os"
 	"time"
 )
 
-func main() {
-	port := "8000"
-	if len(os.Args) > 1 {
-		port = os.Args[1]
-	}
+var port = flag.String("port", "8000", "port number")
+var td = flag.Int("td", 0, "time difference")
 
-	listener, err := net.Listen("tcp", "localhost:"+port)
+// 启动三个服务：
+// Shanghai: go run .\clock.go -port 8010 -td 0
+// Beijing: go run .\clock.go -port 8020 -td 2
+// Xinjiang: go run .\clock.go -port 8030 -td 1
+func main() {
+	flag.Parse()
+
+	listener, err := net.Listen("tcp", "localhost:"+*port)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -45,7 +49,7 @@ func main() {
 func handleConn(c net.Conn) {
 	defer c.Close()
 	for {
-		_, err := io.WriteString(c, time.Now().Format("15:04:05\n"))
+		_, err := io.WriteString(c, time.Now().Add(time.Duration(*td)*time.Hour).Format("15:04:05\n"))
 		if err != nil {
 			return // e.g., client disconnected
 		}

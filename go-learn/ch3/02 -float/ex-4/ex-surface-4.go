@@ -47,8 +47,8 @@ func main() {
 
 		getSvg(w)
 	})
-	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 	fmt.Println("Server Start: localhost:8000")
+	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
 
 func getSvg(out io.Writer) {

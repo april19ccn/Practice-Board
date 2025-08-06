@@ -11,9 +11,11 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 )
 
 type ftpServer struct {
@@ -30,6 +32,13 @@ func (s *ftpServer) Write(p []byte) (n int, err error) {
 
 // 启动服务
 var port = flag.String("port", "8000", "port number")
+
+func (s *ftpServer) Cmd(conn net.Conn) {
+	str := time.Now().Format("2006-01-02 15:04:05 ") + "FTP SERVER: " + s.currentPath + " ❯ "
+	if _, err := io.WriteString(conn, str); err != nil {
+		log.Fatal(err)
+	}
+}
 
 func (s *ftpServer) Serve() {
 	flag.Parse()
@@ -48,10 +57,7 @@ func (s *ftpServer) Serve() {
 			continue
 		}
 
-		_, err = io.WriteString(conn, "link FTP SERVER\n")
-		if err != nil {
-			log.Fatal(err)
-		}
+		s.Cmd(conn)
 
 		go s.Request(conn)
 		go s.Response(conn)
@@ -80,15 +86,16 @@ func (s *ftpServer) Response(conn net.Conn) {
 			switch order[0] {
 			case "cd":
 				if len(order) >= 2 {
-					response, err = s.Cd(order[1])
+					_, err = s.Cd(order[1])
 					if err != nil {
-						response = err.Error()
+						response = err.Error() + "\n"
 					}
 				}
-
-				io.WriteString(conn, response)
 			case "ls":
-				s.Ls()
+				response, err = s.Ls()
+				if err != nil {
+					response = err.Error()
+				}
 			case "get":
 				// s.Get(order[1])
 			case "send":
@@ -96,6 +103,11 @@ func (s *ftpServer) Response(conn net.Conn) {
 			case "close":
 				s.Close(conn)
 			}
+
+			if _, err := io.WriteString(conn, response); err != nil {
+				log.Fatal(err)
+			}
+			s.Cmd(conn)
 
 			s.order = ""
 			s.Unlock()
@@ -123,13 +135,13 @@ func (s *ftpServer) Cd(path string) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return "", fmt.Errorf("directory does not exist\n")
+			return "", fmt.Errorf("directory does not exist")
 		}
 		return "", err
 	}
 	// fmt.Println(info) // fmt.Println(info) 打印的是 os.FileInfo 的具体实现结构（Windows 上是 *os.fileStat），包含文件/目录的完整元数据。
 	if !info.IsDir() {
-		return "", fmt.Errorf("not a directory\n")
+		return "", fmt.Errorf("not a directory")
 	}
 
 	s.currentPath = path
@@ -137,27 +149,29 @@ func (s *ftpServer) Cd(path string) (string, error) {
 	return "FTP SERVER: " + s.currentPath + "\n", nil
 }
 
-func (s *ftpServer) Ls() ([]os.DirEntry, error) {
+func (s *ftpServer) Ls() (string, error) {
 	files, err := os.ReadDir(s.currentPath)
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return "", err
 	}
 
-	fmt.Println("FTP SERVER: ", s.currentPath)
-	fmt.Printf("%-5s %-25s %-15s %s\n", "💎", "ModTime", "Size", "Name")
-	fmt.Printf("%-5s %-25s %-15s %s\n", "------", "-------------------------", "---------------", "------")
+	// lsResult := fmt.Sprint("FTP SERVER: " + s.currentPath + "\n")
+	lsResult := fmt.Sprintf("%-5s %-25s %-15s %s\n", "💎", "ModTime", "Size", "Name")
+	lsResult += fmt.Sprintf("%-5s %-25s %-15s %s\n", "------", "-------------------------", "---------------", "------")
 
 	for _, file := range files {
 		info, _ := file.Info()
 		if file.IsDir() {
-			fmt.Printf("%-5s %-25s %-15s %s\n", "📁", info.ModTime().Format("2006-01-02 15:04:05"), "", file.Name())
+			lsResult += fmt.Sprintf("%-5s %-25s %-15s %s\n", "📁", info.ModTime().Format("2006-01-02 15:04:05"), "", file.Name())
 		} else {
-			fmt.Printf("%-5s %-25s %-15d %s\n", "📄", info.ModTime().Format("2006-01-02 15:04:05"), info.Size(), file.Name())
+			lsResult += fmt.Sprintf("%-5s %-25s %-15d %s\n", "📄", info.ModTime().Format("2006-01-02 15:04:05"), info.Size(), file.Name())
 		}
 	}
 
-	return files, nil
+	fmt.Println(lsResult)
+
+	return lsResult, nil
 }
 
 func (s *ftpServer) Get() {
@@ -169,12 +183,19 @@ func (s *ftpServer) Send() {
 }
 
 func main() {
-	currentPath, err := os.Getwd()
+	// 获取当前服务器工作目录
+	// currentPath, err := os.Getwd()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// 获取home目录
+	u, err := user.Current()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ftp := &ftpServer{currentPath, "", sync.Mutex{}}
+	ftp := &ftpServer{u.HomeDir, "", sync.Mutex{}}
 	ftp.Serve()
 	// ftp.Ls()
 	// ftp.Cd("..")

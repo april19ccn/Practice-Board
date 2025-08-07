@@ -11,7 +11,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -157,6 +156,21 @@ func (s *ftpServer) Ls() (string, error) {
 }
 
 func (s *ftpServer) Get(fileName string) error {
+	if !filepath.IsAbs(fileName) {
+		fileName = filepath.Join(s.currentPath, fileName)
+	}
+
+	file, err := os.Open(fileName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	_, err = io.Copy(s.conn, file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return nil
 }
 
@@ -185,18 +199,19 @@ func Serve() {
 
 func CreateFTP(conn net.Conn) {
 	// 获取当前服务器工作目录
-	// currentPath, err := os.Getwd()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// 获取home目录
-	u, err := user.Current()
+	currentPath, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ftp := &ftpServer{conn, u.HomeDir, "", sync.Mutex{}}
+	// 获取home目录
+	// u, err := user.Current()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// currentPath = u.HomeDir
+
+	ftp := &ftpServer{conn, currentPath, "", sync.Mutex{}}
 	ftp.Cmd()
 
 	go ftp.Request()

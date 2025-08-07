@@ -40,30 +40,6 @@ func (s *ftpServer) Cmd(conn net.Conn) {
 	}
 }
 
-func (s *ftpServer) Serve() {
-	flag.Parse()
-
-	fmt.Println("FTP SERVER START: " + "localhost:" + *port)
-	fmt.Println("FTP SERVER: ", s.currentPath)
-	listener, err := net.Listen("tcp", "localhost:"+*port)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Print(err) // e.g., connection aborted
-			continue
-		}
-
-		s.Cmd(conn)
-
-		go s.Request(conn)
-		go s.Response(conn)
-	}
-}
-
 func (s *ftpServer) Request(conn net.Conn) {
 	defer conn.Close()
 
@@ -182,7 +158,26 @@ func (s *ftpServer) Send() {
 
 }
 
-func main() {
+// 并发不能用共享的 ftpServer
+func Serve() {
+	fmt.Println("FTP SERVER START: " + "localhost:" + *port)
+	listener, err := net.Listen("tcp", "localhost:"+*port)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Print(err) // e.g., connection aborted
+			continue
+		}
+
+		go CreateFTP(conn)
+	}
+}
+
+func CreateFTP(conn net.Conn) {
 	// 获取当前服务器工作目录
 	// currentPath, err := os.Getwd()
 	// if err != nil {
@@ -196,7 +191,15 @@ func main() {
 	}
 
 	ftp := &ftpServer{u.HomeDir, "", sync.Mutex{}}
-	ftp.Serve()
+	ftp.Cmd(conn)
+
+	go ftp.Request(conn)
+	go ftp.Response(conn)
+}
+
+func main() {
+	flag.Parse()
+	Serve()
 	// ftp.Ls()
 	// ftp.Cd("..")
 

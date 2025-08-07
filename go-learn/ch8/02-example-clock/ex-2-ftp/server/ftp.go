@@ -19,9 +19,10 @@ import (
 )
 
 type ftpServer struct {
-	currentPath string
-	order       string
-	sync.Mutex
+	conn        net.Conn // 当前连接
+	currentPath string   // 当前工作目录
+	order       string   // 命令
+	sync.Mutex           // 互斥锁
 }
 
 func (s *ftpServer) Write(p []byte) (n int, err error) {
@@ -33,23 +34,23 @@ func (s *ftpServer) Write(p []byte) (n int, err error) {
 // 启动服务
 var port = flag.String("port", "8000", "port number")
 
-func (s *ftpServer) Cmd(conn net.Conn) {
+func (s *ftpServer) Cmd() {
 	str := time.Now().Format("2006-01-02 15:04:05 ") + "FTP SERVER: " + s.currentPath + " ❯ "
-	if _, err := io.WriteString(conn, str); err != nil {
+	if _, err := io.WriteString(s.conn, str); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (s *ftpServer) Request(conn net.Conn) {
-	defer conn.Close()
+func (s *ftpServer) Request() {
+	defer s.conn.Close()
 
-	if _, err := io.Copy(s, conn); err != nil {
+	if _, err := io.Copy(s, s.conn); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (s *ftpServer) Response(conn net.Conn) {
-	defer conn.Close()
+func (s *ftpServer) Response() {
+	defer s.conn.Close()
 
 	for {
 		if s.order != "" {
@@ -73,17 +74,22 @@ func (s *ftpServer) Response(conn net.Conn) {
 					response = err.Error()
 				}
 			case "get":
-				// s.Get(order[1])
+				if len(order) >= 2 {
+					err = s.Get(order[1])
+					if err != nil {
+						response = err.Error() + "\n"
+					}
+				}
 			case "send":
 				// s.Send(order[1])
 			case "close":
-				s.Close(conn)
+				s.Close()
 			}
 
-			if _, err := io.WriteString(conn, response); err != nil {
+			if _, err := io.WriteString(s.conn, response); err != nil {
 				log.Fatal(err)
 			}
-			s.Cmd(conn)
+			s.Cmd()
 
 			s.order = ""
 			s.Unlock()
@@ -92,9 +98,9 @@ func (s *ftpServer) Response(conn net.Conn) {
 
 }
 
-func (s *ftpServer) Close(conn net.Conn) {
-	defer conn.Close()
-	_, err := io.WriteString(conn, "close FTP SERVER\n")
+func (s *ftpServer) Close() {
+	defer s.conn.Close()
+	_, err := io.WriteString(s.conn, "close FTP SERVER\n")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -150,8 +156,8 @@ func (s *ftpServer) Ls() (string, error) {
 	return lsResult, nil
 }
 
-func (s *ftpServer) Get() {
-
+func (s *ftpServer) Get(fileName string) error {
+	return nil
 }
 
 func (s *ftpServer) Send() {
@@ -190,11 +196,11 @@ func CreateFTP(conn net.Conn) {
 		log.Fatal(err)
 	}
 
-	ftp := &ftpServer{u.HomeDir, "", sync.Mutex{}}
-	ftp.Cmd(conn)
+	ftp := &ftpServer{conn, u.HomeDir, "", sync.Mutex{}}
+	ftp.Cmd()
 
-	go ftp.Request(conn)
-	go ftp.Response(conn)
+	go ftp.Request()
+	go ftp.Response()
 }
 
 func main() {

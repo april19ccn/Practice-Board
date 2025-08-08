@@ -5,6 +5,7 @@
 package main
 
 import (
+	"example/learn/ch8/02-example-clock/ex-2-ftp/utils"
 	"flag"
 	"fmt"
 	"io"
@@ -17,6 +18,9 @@ import (
 	"time"
 )
 
+// 设置服务器端口
+var port = flag.String("port", "8000", "port number")
+
 type ftpServer struct {
 	conn        net.Conn // 当前连接
 	currentPath string   // 当前工作目录
@@ -24,15 +28,14 @@ type ftpServer struct {
 	sync.Mutex           // 互斥锁
 }
 
+// 实现 io.Writer，用于从客户端读取命令
 func (s *ftpServer) Write(p []byte) (n int, err error) {
 	s.order = strings.ReplaceAll(string(p), "\n", "")
 	s.order = strings.ReplaceAll(s.order, "\r", "")
 	return len(p), nil
 }
 
-// 启动服务
-var port = flag.String("port", "8000", "port number")
-
+// 模仿控制台输出路径
 func (s *ftpServer) Cmd() {
 	str := time.Now().Format("2006-01-02 15:04:05 ") + "FTP SERVER: " + s.currentPath + " ❯ "
 	if _, err := io.WriteString(s.conn, str); err != nil {
@@ -40,6 +43,8 @@ func (s *ftpServer) Cmd() {
 	}
 }
 
+// 处理客户端发来的请求，通过io.Copy写入ftp的order属性
+// 注意，这里的io.Copy是阻塞的，需要使用goroutines
 func (s *ftpServer) Request() {
 	defer s.conn.Close()
 
@@ -48,6 +53,10 @@ func (s *ftpServer) Request() {
 	}
 }
 
+// 响应客户端发来的请求，通过io.Copy写入ftp的order属性
+// cd： 切换目录，通过 io.WriteString 返回错误信息
+// ls： 列出目录内文件，通过 io.WriteString 返回目录内文件信息或错误
+// get： 获取文件，通过 Get方法中 io.Copy 返回文件，io.Copy读取完文件就会结束，不会阻塞程序
 func (s *ftpServer) Response() {
 	defer s.conn.Close()
 
@@ -178,9 +187,10 @@ func (s *ftpServer) Send() {
 
 }
 
-// 并发不能用共享的 ftpServer
+// 启动服务器，并根据请求创建ftpServer（goroutine）
 func Serve() {
 	fmt.Println("FTP SERVER START: " + "localhost:" + *port)
+
 	listener, err := net.Listen("tcp", "localhost:"+*port)
 	if err != nil {
 		log.Fatal(err)
@@ -197,25 +207,18 @@ func Serve() {
 	}
 }
 
+// 创建ftpServer（goroutine）
+// 每一个请求对应一个独立的ftpServer结构体和两个并发处理方法
 func CreateFTP(conn net.Conn) {
-	// 获取当前服务器工作目录
-	currentPath, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// 获取home目录
-	// u, err := user.Current()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// currentPath = u.HomeDir
+	currentPath, _ := utils.GetWorkPath()
 
 	ftp := &ftpServer{conn, currentPath, "", sync.Mutex{}}
 	ftp.Cmd()
 
-	go ftp.Request()
-	go ftp.Response()
+	// 由于8.2章还没有学到信道通信，所以两个协程是依赖ftpServer的order属性来进行通信
+	// Response 在处理order时会上锁，防止Request修改，同时在处理期间本身也是要等服务器回应
+	go ftp.Request()  // Request 会一直监听客户端的指令，必须单独运行一个协程
+	go ftp.Response() // Response 会一直监听ftp的order属性，通过order属性的变化来响应客户端
 }
 
 func main() {

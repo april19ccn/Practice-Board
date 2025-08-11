@@ -1,9 +1,3 @@
-// Copyright © 2016 Alan A. A. Donovan & Brian W. Kernighan.
-// License: https://creativecommons.org/licenses/by-nc-sa/4.0/
-
-// See page 223.
-
-// Reverb1 is a TCP server that simulates an echo.
 package main
 
 import (
@@ -15,7 +9,6 @@ import (
 	"time"
 )
 
-// !+
 func echo(c net.Conn, shout string, delay time.Duration) {
 	fmt.Fprintln(c, "\t", strings.ToUpper(shout))
 	time.Sleep(delay)
@@ -27,15 +20,15 @@ func echo(c net.Conn, shout string, delay time.Duration) {
 func handleConn(c net.Conn) {
 	input := bufio.NewScanner(c)
 	for input.Scan() {
+		echo(c, input.Text(), 1*time.Second)
+
 		// !+
-		go echo(c, input.Text(), 1*time.Second) // 并发使用回声，使其更贴近真实
+		// go echo(c, input.Text(), 1*time.Second) // 并发使用回声，使其更贴近真实
 		//!-
 	}
 	// NOTE: ignoring potential errors from input.Err()
 	c.Close()
 }
-
-//!-
 
 func main() {
 	l, err := net.Listen("tcp", "localhost:8000")

@@ -31,6 +31,7 @@ func main() {
 	mustCopy(conn, os.Stdin)
 	conn.(*net.TCPConn).CloseWrite()
 	<-done // wait for background goroutine to finish
+	fmt.Println("证明是否阻塞等待接收")
 	conn.Close()
 }
 

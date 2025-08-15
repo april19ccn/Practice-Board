@@ -3,11 +3,13 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"example/learn/ch8/02-example-clock/ex-2-ftp/utils"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -21,10 +23,9 @@ type ftpClient struct {
 func (ftp *ftpClient) Write(p []byte) (n int, err error) {
 	order := strings.Split(ftp.order, " ")
 
-	fmt.Println(order)
-
-	if len(order) >= 2 && order[0] == "get" && !strings.Contains(string(p), "FTP SERVER") {
-		HandleGet(p, order)
+	if len(order) >= 2 && order[0] == "get" {
+		ftp.order = ""
+		ftp.HandleGet(p, order)
 	} else {
 		fmt.Print(string(p))
 	}
@@ -40,6 +41,13 @@ func (ftp *ftpClient) SendCommand() {
 	for input.Scan() {
 		_, err := io.WriteString(ftp.conn, input.Text()+"\n")
 		ftp.order = input.Text()
+
+		order := strings.Split(ftp.order, " ")
+		if len(order) >= 2 && order[0] == "send" {
+			ftp.order = ""
+			ftp.HandleSend(order[1], order[2])
+		}
+
 		if err != nil {
 			return
 		}
@@ -54,18 +62,41 @@ func (ftp *ftpClient) HandleResult() {
 }
 
 // 处理 get 命令
-func HandleGet(t []byte, target []string) {
+// target 储存路径 如果为空，则使用默认地址
+func (ftp *ftpClient) HandleGet(t []byte, target []string) error {
 	// 如果文件不存在：创建新文件
 	// 如果文件已存在：清空文件内容（截断为0字节）
 	file, err := os.Create("test.txt")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
 	_, err = io.Copy(file, bytes.NewReader(t))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
+}
+
+// 处理 send 命令
+func (ftp *ftpClient) HandleSend(filePath string, sendPath string) error {
+	if !filepath.IsAbs(filePath) {
+		currentPath, _ := utils.GetWorkPath()
+		filePath = filepath.Join(currentPath, filePath)
+	}
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(ftp.conn, file)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func main() {

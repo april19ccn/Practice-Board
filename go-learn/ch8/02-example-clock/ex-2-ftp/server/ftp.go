@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"example/learn/ch8/02-example-clock/ex-2-ftp/utils"
 	"flag"
 	"fmt"
@@ -30,14 +31,19 @@ type ftpServer struct {
 
 // 实现 io.Writer，用于从客户端读取命令
 func (s *ftpServer) Write(p []byte) (n int, err error) {
-	s.order = strings.ReplaceAll(string(p), "\n", "")
-	s.order = strings.ReplaceAll(s.order, "\r", "")
+	order := strings.Split(s.order, " ")
+	if order[0] == "send" {
+		s.Send(p)
+	} else if s.order == "" {
+		s.order = strings.ReplaceAll(string(p), "\n", "")
+		s.order = strings.ReplaceAll(s.order, "\r", "")
+	}
 	return len(p), nil
 }
 
 // 模仿控制台输出路径
 func (s *ftpServer) Cmd() {
-	str := time.Now().Format("2006-01-02 15:04:05 ") + "FTP SERVER: " + s.currentPath + " ❯ "
+	str := "$ " + time.Now().Format("2006-01-02 15:04:05 ") + "FTP SERVER: " + s.currentPath + " ❯ "
 	if _, err := io.WriteString(s.conn, str); err != nil {
 		log.Fatal(err)
 	}
@@ -61,8 +67,9 @@ func (s *ftpServer) Response() {
 	defer s.conn.Close()
 
 	for {
+		fmt.Printf(s.order)
 		if s.order != "" {
-			s.Lock()
+			// s.Lock()
 			order := strings.Split(s.order, " ")
 
 			response := ""
@@ -89,7 +96,12 @@ func (s *ftpServer) Response() {
 					}
 				}
 			case "send":
-				// s.Send(order[1])
+				// s.Send()
+				if len(order) >= 3 {
+					// 等待文件数据
+					fmt.Println("等待文件数据---")
+					continue // 如果有锁话，下一次循环会被锁挡着，然后死锁阻塞
+				}
 			case "close":
 				s.Close()
 			}
@@ -100,7 +112,7 @@ func (s *ftpServer) Response() {
 			s.Cmd()
 
 			s.order = ""
-			s.Unlock()
+			// s.Unlock()
 		}
 	}
 
@@ -171,20 +183,36 @@ func (s *ftpServer) Get(fileName string) error {
 
 	file, err := os.Open(fileName)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
 
 	_, err = io.Copy(s.conn, file)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
 }
 
-func (s *ftpServer) Send() {
+func (s *ftpServer) Send(t []byte) error {
+	file, err := os.Create("send.txt")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
+	fmt.Println("++++")
+	_, err = io.Copy(file, bytes.NewReader(t))
+	if err != nil {
+		return err
+	}
+
+	// 发送确认信息给客户端
+	_, err = io.WriteString(s.conn, "File uploaded successfully\n")
+	s.order = "send Finish"
+
+	return err
 }
 
 // 启动服务器，并根据请求创建ftpServer（goroutine）

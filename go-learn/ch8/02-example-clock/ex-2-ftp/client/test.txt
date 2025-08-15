@@ -1,1 +1,1 @@
-测试下载文件
+open D:\Star_Code\A_Break\-Test\practice\go-learn\ch8\02-example-clock\ex-2-ftp\server\t.txt: The system cannot find the file specified.

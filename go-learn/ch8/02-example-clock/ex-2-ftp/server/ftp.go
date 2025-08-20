@@ -45,7 +45,7 @@ func (s *ftpServer) Write(p []byte) (n int, err error) {
 func (s *ftpServer) Cmd() {
 	str := "$ " + time.Now().Format("2006-01-02 15:04:05 ") + "FTP SERVER: " + s.currentPath + " ❯ "
 	if _, err := io.WriteString(s.conn, str); err != nil {
-		log.Fatal(err)
+		fmt.Println("Cmd: " + err.Error())
 	}
 }
 
@@ -55,7 +55,8 @@ func (s *ftpServer) Request() {
 	defer s.conn.Close()
 
 	if _, err := io.Copy(s, s.conn); err != nil {
-		log.Fatal(err)
+		fmt.Println("Request: " + err.Error())
+		s.conn.Close()
 	}
 }
 
@@ -104,10 +105,11 @@ func (s *ftpServer) Response() {
 				}
 			case "close":
 				s.Close()
+				return
 			}
 
 			if _, err := io.WriteString(s.conn, response); err != nil {
-				log.Fatal(err)
+				fmt.Println("Response: " + err.Error())
 			}
 			s.Cmd()
 
@@ -154,7 +156,6 @@ func (s *ftpServer) Cd(path string) (string, error) {
 func (s *ftpServer) Ls() (string, error) {
 	files, err := os.ReadDir(s.currentPath)
 	if err != nil {
-		log.Fatal(err)
 		return "", err
 	}
 

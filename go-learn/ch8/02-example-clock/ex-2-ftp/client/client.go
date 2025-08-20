@@ -26,9 +26,13 @@ func (ftp *ftpClient) Write(p []byte) (n int, err error) {
 	if len(order) >= 2 && order[0] == "get" {
 		ftp.order = ""
 		ftp.HandleGet(p, order)
+	} else if len(order) >= 1 && order[0] == "close" {
+		fmt.Print(string(p))
+		os.Exit(0)
 	} else {
 		fmt.Print(string(p))
 	}
+
 	return len(p), nil
 }
 

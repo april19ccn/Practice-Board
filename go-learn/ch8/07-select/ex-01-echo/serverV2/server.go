@@ -45,7 +45,7 @@ func handleConn(c net.Conn) {
 
 		for {
 			select {
-			case <-timer.C: // 可以优化一下这个 看看重复创建有什么影响
+			case <-timer.C:
 				fmt.Println("客户端10s未发送消息，已关闭")
 				closeConn()
 				return

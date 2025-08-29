@@ -10,6 +10,7 @@
 package main
 
 import (
+	"context"
 	newlinks "example/learn/ch8/09-exit/ex-01-cancel/newlinks"
 	"fmt"
 	"log"
@@ -23,26 +24,33 @@ type EXData struct {
 	data  []string
 }
 
-var done = make(chan struct{})
+// var done = make(chan struct{})
 
-func cancelled() bool {
-	select {
-	case <-done:
-		return true
-	default:
-		return false
-	}
-}
+// func cancelled() bool {
+// 	select {
+// 	case <-done:
+// 		return true
+// 	default:
+// 		return false
+// 	}
+// }
 
 // !+sema
 // tokens is a counting semaphore used to
 // enforce a limit of 20 concurrent requests.
 var tokens = make(chan struct{}, 20)
 
-func crawl(url string, depth int) EXData {
+func crawl(ctx context.Context, url string, depth int) EXData {
+	// 检查是否已取消
+	select {
+	case <-ctx.Done():
+		return EXData{depth + 1, nil}
+	default:
+	}
+
 	fmt.Println(url)
 	tokens <- struct{}{} // acquire a token
-	list, err := newlinks.Extract(url, done)
+	list, err := newlinks.Extract(url, ctx)
 	<-tokens // release the token
 
 	if err != nil {
@@ -65,9 +73,13 @@ func main() {
 		}
 	}()
 
+	// 使用context来处理取消
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	go func() {
 		os.Stdin.Read(make([]byte, 1)) // read a single byte
-		close(done)
+		cancel()
 	}()
 
 	worklist := make(chan EXData)
@@ -85,13 +97,14 @@ func main() {
 				if !seen[link] {
 					seen[link] = true
 					n++
-					if cancelled() {
+					select {
+					case <-ctx.Done():
 						return
+					default:
+						go func(link string, depth int) {
+							worklist <- crawl(ctx, link, depth)
+						}(link, t.depth)
 					}
-					go func(link string, depth int) {
-
-						worklist <- crawl(link, depth)
-					}(link, t.depth)
 				}
 			}
 		} else {
@@ -99,7 +112,7 @@ func main() {
 		}
 	}
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 	panic("调试：检查goroutine退出状态")
 }
 

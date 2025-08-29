@@ -2,8 +2,10 @@
 package newlinks
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"golang.org/x/net/html"
 )
@@ -25,18 +27,26 @@ import (
 // Extract makes an HTTP GET request to the specified URL, parses
 // the response as HTML, and returns the links in the HTML document.
 // The request can be cancelled by closing the cancel channel.
-func Extract(url string, cancel <-chan struct{}) ([]string, error) {
+func Extract(url string, ctx context.Context) ([]string, error) {
+	tr := &http.Transport{
+		IdleConnTimeout:   1 * time.Second,
+		DisableKeepAlives: true, // 禁用持久连接
+	}
+	client := &http.Client{
+		Transport: tr,
+	}
+
 	// 创建一个新的请求，而不是使用http.Get
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// 设置Cancel字段以支持取消请求
-	req.Cancel = cancel
+	// // 设置Cancel字段以支持取消请求
+	// req.Cancel = cancel
 
 	// 使用http.DefaultClient.Do发送请求
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}

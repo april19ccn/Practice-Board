@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -32,6 +33,16 @@ func cancelled() bool {
 //!-1
 
 func main() {
+	// 添加defer捕获panic并打印所有goroutine栈
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Panic caught: %v\n", r)
+			buf := make([]byte, 1<<20)
+			stackSize := runtime.Stack(buf, true)
+			fmt.Printf("=== ALL GOROUTINES ===\n%s\n", buf[:stackSize])
+		}
+	}()
+
 	// Determine the initial directories.
 	roots := os.Args[1:]
 	if len(roots) == 0 {
@@ -70,6 +81,9 @@ loop:
 			for range fileSizes {
 				// Do nothing.
 			}
+
+			fmt.Println("====")
+			panic("调试：检查goroutine退出状态")
 			return
 		case size, ok := <-fileSizes:
 			// ...

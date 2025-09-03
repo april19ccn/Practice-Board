@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"sync"
 	"time"
 )
 
@@ -87,28 +86,51 @@ func handleConn(conn net.Conn) {
 	messages <- who + " has arrived" //为什么自身收不到这个消息，此时还没有加入到客户端列表
 	entering <- clientInfo{who, ch}
 
-	var once sync.Once
-	closeClient := func() {
-		leaving <- clientInfo{who, ch}
-		messages <- who + " has left"
-		conn.Close()
-	}
-
+	autoClose := make(chan struct{})
+	normalClose := make(chan struct{})
 	timer := time.NewTimer(10 * time.Second)
 	go func() {
-		<-timer.C
-		once.Do(closeClient)
+		for range timer.C {
+			leaving <- clientInfo{who, ch}
+			messages <- who + " was offline"
+			conn.Close()
+			close(autoClose)
+			timer.Stop()
+		}
+		fmt.Println("终止定时器----")
+	}()
+
+	go func() {
+		select {
+		case <-autoClose:
+			fmt.Println(who + "go handleConn 结束")
+		case <-normalClose:
+			timer.Stop()
+			leaving <- clientInfo{who, ch}
+			messages <- who + " has left"
+			conn.Close()
+		}
 	}()
 
 	input := bufio.NewScanner(conn)
+loop:
 	for input.Scan() {
 		messages <- who + ": " + input.Text()
 		timer.Reset(10 * time.Second)
+		select {
+		case <-autoClose:
+			fmt.Println(who + "break loop")
+			break loop
+		default:
+		}
+	}
+	select {
+	case <-autoClose:
+	default:
+		normalClose <- struct{}{}
 	}
 
-	once.Do(closeClient)
-	timer.Stop()
-	fmt.Println(who + " go handleConn 结束")
+	// NOTE: ignoring potential errors from input.Err()
 }
 
 func clientWriter(conn net.Conn, ch <-chan string) {

@@ -78,12 +78,22 @@ func broadcaster() {
 	}
 }
 
+const AUTO_CLOSE_TIME = 1000
+
 func handleConn(conn net.Conn) {
 	ch := make(chan string)   // outgoing client messages
 	go clientWriter(conn, ch) // 通过消息通道将消息下发给客户端
 
+	input := bufio.NewScanner(conn)
+
+	// 设置name
 	who := conn.RemoteAddr().String()
-	ch <- "You are " + who
+	ch <- "What is your name?"
+	for input.Scan() {
+		who = input.Text()
+		break
+	}
+
 	messages <- who + " has arrived" //为什么自身收不到这个消息，此时还没有加入到客户端列表
 	entering <- clientInfo{who, ch}
 
@@ -94,16 +104,15 @@ func handleConn(conn net.Conn) {
 		conn.Close()
 	}
 
-	timer := time.NewTimer(10 * time.Second)
+	timer := time.NewTimer(AUTO_CLOSE_TIME * time.Second)
 	go func() {
 		<-timer.C
 		once.Do(closeClient)
 	}()
 
-	input := bufio.NewScanner(conn)
 	for input.Scan() {
 		messages <- who + ": " + input.Text()
-		timer.Reset(10 * time.Second)
+		timer.Reset(AUTO_CLOSE_TIME * time.Second)
 	}
 
 	once.Do(closeClient)

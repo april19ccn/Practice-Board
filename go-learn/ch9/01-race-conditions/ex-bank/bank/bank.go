@@ -36,7 +36,6 @@ func teller() {
 			} else {
 				data.res <- false
 			}
-
 		}
 	}
 }

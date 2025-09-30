@@ -30,6 +30,17 @@ func (s *IntSet) Add(x int) {
 	s.words[word] |= 1 << bit
 }
 
+func (s *IntSet) AddPro(x int) {
+	word, bit := x/32, uint(x%32)
+	if word >= len(s.words) {
+		// 计算需要增加的元素数量
+		n := word - len(s.words) + 1
+		// 一次性添加n个0
+		s.words = append(s.words, make([]uint64, n)...)
+	}
+	s.words[word] |= 1 << bit
+}
+
 // UnionWith 将 s 设置为 s 和 t 的并集。
 func (s *IntSet) UnionWith(t *IntSet) {
 	for i, tword := range t.words {

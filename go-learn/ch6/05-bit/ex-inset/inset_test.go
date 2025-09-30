@@ -249,3 +249,17 @@ func TestEcapsulation(t *testing.T) {
 	got.Add(188)
 	fmt.Println(got.words)
 }
+
+func BenchmarkIntSetAdd(b *testing.B) {
+	var s IntSet
+	for i := 0; i < b.N; i++ {
+		s.Add(i)
+	}
+}
+
+func BenchmarkIntSetAddPro(b *testing.B) {
+	var s IntSet
+	for i := 0; i < b.N; i++ {
+		s.AddPro(i)
+	}
+}

@@ -67,6 +67,8 @@ func main() {
 	x.Add(144)
 	x.Add(9)
 	fmt.Println(x.String()) // "{1 9 144}"
+	fmt.Println(x)
+	fmt.Println("---------")
 
 	y.Add(9)
 	y.Add(42)

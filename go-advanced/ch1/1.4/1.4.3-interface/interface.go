@@ -6,12 +6,25 @@ import (
 	"io"
 	"os"
 	"strings"
+	"testing"
 )
 
 // ******* io.Writer 接口
 type UpperWriter struct {
 	io.Writer
 }
+
+// 这里不要与接口内嵌弄混了
+// 接口内嵌：
+// [接口类型 - Go语言圣经](https://golang-china.github.io/gopl-zh/ch7/ch7-02.html#WCREFX-12044696)
+// 上面用到的语法和结构内嵌相似，我们可以用这种方式以一个简写命名一个接口，而不用声明它所有的方法。这种方式称为接口内嵌。
+
+// type UpperWriter struct {
+// 	Writer io.Writer
+// }
+// 这里是内嵌了一个 io.Writer 接口类型的字段
+// &UpperWriter{os.Stdout}
+// => UpperWriter{Writer: os.Stdout}
 
 func (p *UpperWriter) Write(data []byte) (n int, err error) {
 	return p.Writer.Write(bytes.ToUpper(data))
@@ -35,6 +48,14 @@ type UpperString string
 
 func (s UpperString) String() string {
 	return strings.ToUpper(string(s))
+}
+
+type TB struct {
+	testing.TB
+}
+
+func (p *TB) Fatal(args ...interface{}) {
+	fmt.Println("TB.Fatal disabled!")
 }
 
 func main() {
@@ -62,4 +83,21 @@ func main() {
 	// 	p.fmtString(v.String(), verb)
 	// 	return
 	// }
+
+	// var (
+	// 	a io.ReadCloser = (*os.File)(f) // 隐式转换，*os.File满足io.ReadCloser接口
+	// 	b io.Reader     = a             // 隐式转换，io.ReadCloser满足io.Reader接口
+	// 	c io.Closer     = a             // 隐式转换，io.ReadCloser满足io.Closer接口
+	// 	d io.Reader     = c.(io.Reader) // 显式转换，io.Closer不满足io.Reader接口
+	// )
+
+	var tb testing.TB = new(TB)
+	tb.Fatal("Hello, playground")
+	// 为什么 tb 不应该是 *testing.TB？
+	// 你疑惑的点可能是：“既然右边是指针，左边不也应该是指针吗？”
+
+	// 如果写成 *testing.TB，它的含义是 “指向接口的指针” 。在 Go 语言中，几乎永远不需要（也不应该）使用指向接口的指针。
+
+	// 接口本质上已经像是一个指针：接口类型的底层实现包含两个指针，一个指向类型信息，一个指向具体的数据。
+	// 多此一举：如果你定义 var tb *testing.TB，你就得去取接口的地址。这不仅冗余，而且会导致很多令人困惑的行为。
 }
